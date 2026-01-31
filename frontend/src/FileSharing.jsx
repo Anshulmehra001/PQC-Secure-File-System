@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { API_URL } from './config';
 
 export default function FileSharing() {
   const [file, setFile] = useState(null);
@@ -35,7 +36,7 @@ export default function FileSharing() {
 
     try {
       console.log('Uploading file to backend...');
-      const response = await fetch('http://localhost:3001/api/share/upload', {
+      const response = await fetch(`${API_URL}/api/share/upload`, {
         method: 'POST',
         body: formData
       });

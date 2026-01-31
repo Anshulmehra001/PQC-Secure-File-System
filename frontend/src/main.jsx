@@ -5,6 +5,7 @@ import FileSharing from './FileSharing';
 import CloudStorage from './CloudStorage';
 import ShareDownload from './ShareDownload';
 import Login from './Login';
+import { API_URL } from './config';
 import './styles.css';
 
 function App() {
@@ -31,7 +32,7 @@ function App() {
 
   const handleLogout = () => {
     if (token) {
-      fetch('http://localhost:3001/api/auth/logout', {
+      fetch(`${API_URL}/api/auth/logout`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       }).catch(() => {});

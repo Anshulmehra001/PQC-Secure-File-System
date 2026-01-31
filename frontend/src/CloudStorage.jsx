@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_URL } from './config';
 
 export default function CloudStorage({ token, username }) {
   const [files, setFiles] = useState([]);
@@ -10,7 +11,7 @@ export default function CloudStorage({ token, username }) {
 
   const fetchFiles = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/storage/files', {
+      const response = await fetch(`${API_URL}/api/storage/files`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!response.ok) throw new Error('Failed to fetch files');
@@ -30,7 +31,7 @@ export default function CloudStorage({ token, username }) {
     formData.append('file', file);
 
     try {
-      const response = await fetch('http://localhost:3001/api/storage/upload', {
+      const response = await fetch(`${API_URL}/api/storage/upload`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         body: formData
@@ -46,7 +47,7 @@ export default function CloudStorage({ token, username }) {
 
   const handleDownload = async (fileId, filename) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/storage/files/${fileId}/download`, {
+      const response = await fetch(`${API_URL}/api/storage/files/${fileId}/download`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!response.ok) throw new Error('Download failed');
@@ -65,7 +66,7 @@ export default function CloudStorage({ token, username }) {
     if (!confirm('Delete this file?')) return;
 
     try {
-      const response = await fetch(`http://localhost:3001/api/storage/files/${fileId}`, {
+      const response = await fetch(`${API_URL}/api/storage/files/${fileId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });

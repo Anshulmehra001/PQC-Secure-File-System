@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { API_URL } from './config';
 
 export default function ShareDownload() {
   const { id } = useParams();
@@ -12,7 +13,7 @@ export default function ShareDownload() {
 
   const fetchFileInfo = async () => {
     try {
-      const response = await fetch(`http://localhost:3001/api/share/${id}`);
+      const response = await fetch(`${API_URL}/api/share/${id}`);
       if (!response.ok) {
         const data = await response.json();
         setError(data.error);
@@ -27,7 +28,7 @@ export default function ShareDownload() {
 
   const handleDownload = async () => {
     try {
-      const response = await fetch(`http://localhost:3001/api/share/${id}/download`);
+      const response = await fetch(`${API_URL}/api/share/${id}/download`);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
