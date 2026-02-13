@@ -83,9 +83,9 @@ export default function CloudStorage({ token, username }) {
         <h1>☁️ PQC Secure Cloud Storage</h1>
         <p className="subtitle">Welcome back, {username}! Your quantum-safe storage</p>
         <div className="hero-badges">
-          <span className="hero-badge">Zero-Knowledge</span>
-          <span className="hero-badge">Client-Side Encryption</span>
-          <span className="hero-badge">Quantum-Safe</span>
+          <span className="hero-badge">Quantum-Resistant</span>
+          <span className="hero-badge">Kyber512 + ML-DSA-44</span>
+          <span className="hero-badge">AES-256-GCM</span>
         </div>
       </div>
 
