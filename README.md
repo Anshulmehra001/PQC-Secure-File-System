@@ -95,22 +95,29 @@ npm run dev
 
 ## 🔬 Technology Stack
 
-### Backend
-- **Python 3.12** + Flask
-- **liboqs 0.15.0** - Real PQC implementation
-- **SQLite** - Database for metadata
-- **PBKDF2** - Password hashing
-
 ### Frontend
-- **React 18** + Vite
-- **React Router** - Navigation
-- **Custom CSS** - Cyberpunk dark theme
+- **React 18** - Modern UI framework with hooks
+- **Vite** - Lightning-fast build tool and dev server
+- **React Router** - Client-side routing and navigation
+- **JavaScript (JSX)** - Component-based architecture
+- **CSS3** - Custom cyberpunk theme (neon green #00ff88)
+
+### Backend
+- **Python 3.12** - Latest Python with performance improvements
+- **Flask** - Lightweight web framework with CORS support
+- **liboqs 0.15.0** - Real post-quantum cryptography library
+- **SQLite** - Embedded database for user data and metadata
+- **CORS** - Cross-origin resource sharing for API access
 
 ### Cryptography
-- **Kyber512** - Post-quantum KEM (NIST Level 1)
-- **ML-DSA-44** - Post-quantum signatures (NIST Level 2)
-- **AES-256-GCM** - Symmetric encryption
+- **Kyber512** - Post-quantum key encapsulation (NIST PQC standard)
+- **ML-DSA-44** (Dilithium2) - Post-quantum digital signatures
+- **AES-256-GCM** - Symmetric encryption with authentication
 - **PBKDF2-HMAC-SHA256** - Password hashing (100k iterations)
+
+### Infrastructure
+- **WSL2 Ubuntu** - Windows Subsystem for Linux development environment
+- **Git/GitHub** - Version control and collaboration
 
 ## 📊 Project Structure
 
@@ -183,6 +190,44 @@ Want to verify this uses **real quantum encryption**? See **[PROVE_PQC.md](PROVE
 - **Research**: Experiment with NIST PQC algorithms
 - **Prototype**: Base for quantum-safe applications
 - **Testing**: Benchmark PQC performance
+
+## ⭐ What Makes This Special?
+
+### Compared to Google Drive / Dropbox / OneDrive:
+- ✅ **Quantum-Resistant**: Protected against future quantum computer attacks
+- ✅ **NIST Standardized**: Uses official post-quantum algorithms (Kyber, Dilithium)
+- ✅ **Open Source Crypto**: Transparent implementation with liboqs
+- ✅ **Educational**: Full source code to learn from
+- ❌ **Not Zero-Knowledge**: Server can decrypt files (same as Google Drive)
+
+### Compared to ProtonDrive / Tresorit (Zero-Knowledge):
+- ✅ **Quantum-Resistant**: They use classical crypto, we use PQC
+- ✅ **Faster Development**: Server-side encryption is simpler
+- ✅ **Password Recovery**: Possible to reset passwords
+- ❌ **Not Zero-Knowledge**: Server has encryption keys (trade-off for convenience)
+
+### Compared to Academic PQC Demos:
+- ✅ **Real Implementation**: Uses actual liboqs library, not simulation
+- ✅ **Full Application**: Complete file sharing + cloud storage system
+- ✅ **Modern UI**: React-based interface, not command-line only
+- ✅ **Production-Ready Crypto**: NIST-standardized algorithms
+
+### Unique Features:
+1. **Hybrid Encryption**: Combines PQC (Kyber) with AES for optimal performance
+2. **Digital Signatures**: Every file signed with quantum-safe ML-DSA-44
+3. **Dual Mode**: Both anonymous file sharing AND authenticated cloud storage
+4. **Expiring Links**: Time-limited file sharing (1-24 hours)
+5. **User Isolation**: Complete separation between user accounts
+6. **WSL2 Integration**: Seamless Windows + Linux development workflow
+
+### Security Level:
+- **Encryption at Rest**: ✅ (Files encrypted on disk)
+- **Encryption in Transit**: ✅ (HTTPS recommended for production)
+- **Quantum Resistance**: ✅ (Kyber512 + ML-DSA-44)
+- **Zero-Knowledge**: ❌ (Server can decrypt - same as Google Drive)
+- **Access Control**: ✅ (User authentication + session management)
+
+**Bottom Line**: This project offers **Google Drive-level security with quantum protection** - something major cloud providers don't have yet.
 
 ## 📝 License
 
