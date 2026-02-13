@@ -229,6 +229,78 @@ Want to verify this uses **real quantum encryption**? See **[PROVE_PQC.md](PROVE
 
 **Bottom Line**: This project offers **Google Drive-level security with quantum protection** - something major cloud providers don't have yet.
 
+## 🗺️ Roadmap
+
+### Current Implementation: Server-Side Encryption
+**How it works now:**
+```
+User → Upload file → Server encrypts with Kyber512 → Server stores encrypted file + keys in database
+                                                      ↓
+                                                Server can decrypt anytime
+```
+
+**What you get:**
+- ✅ Quantum-resistant encryption (Kyber512 + ML-DSA-44)
+- ✅ Fast encryption/decryption (native Python liboqs)
+- ✅ Password recovery possible
+- ✅ Easy to use
+- ❌ Server can read your files (like Google Drive)
+
+### Future: Zero-Knowledge Encryption (Planned)
+**How it would work:**
+```
+User enters password → Browser derives encryption key → Encrypt file in browser → Upload encrypted blob
+                       ↓                                                          ↓
+                   Key never sent to server                              Server stores blob only (can't decrypt)
+```
+
+**What you would get:**
+- ✅ True zero-knowledge (server CANNOT read files)
+- ✅ Maximum privacy (like ProtonDrive)
+- ✅ Still quantum-resistant
+- ❌ Forget password = lose all files forever (no recovery)
+- ❌ Slower (JavaScript crypto vs native Python)
+
+### Implementation Difficulty: **Medium** ⚠️
+
+**Changes Required:**
+
+| Component | Current | Zero-Knowledge | Difficulty |
+|-----------|---------|----------------|------------|
+| **Frontend** | Upload raw file | Encrypt in browser with `pqc-kyber` npm package | Medium |
+| **Key Derivation** | None | PBKDF2 from password in browser | Easy |
+| **Backend** | Encrypt + store keys | Just store encrypted blobs | Easy |
+| **Database** | Stores encryption keys | Only stores metadata | Easy |
+| **Download** | Server decrypts | Browser decrypts with password | Medium |
+| **File Sharing** | Server generates keys | Share encrypted key with link | Hard |
+| **Password Reset** | Possible | **IMPOSSIBLE** (by design) | N/A |
+
+**Estimated Implementation Time:** 6-8 hours
+
+**Files to Modify:**
+1. `frontend/package.json` - Add `pqc-kyber` or `@noble/post-quantum`
+2. `frontend/src/CloudStorage.jsx` - Add client-side encryption logic
+3. `frontend/src/Login.jsx` - Derive encryption key from password
+4. `backend-python/app.py` - Remove server-side encryption, store blobs only
+5. `backend-python/pqc_files.db` - Remove `encrypted_key` column
+
+**Trade-off Decision:**
+- **Keep current** = Convenience + password recovery (like Google Drive)
+- **Implement zero-knowledge** = Maximum privacy + no password recovery (like ProtonDrive)
+
+**Status:** 🔄 Not yet implemented (current version prioritizes usability)
+
+### Other Planned Features
+- [ ] HTTPS/TLS support for production
+- [ ] File size limits and quotas
+- [ ] Multi-file upload
+- [ ] Folder support
+- [ ] File versioning
+- [ ] 2FA authentication
+- [ ] Admin dashboard
+- [ ] Docker deployment
+- [ ] Mobile app (React Native)
+
 ## 📝 License
 
 This is a demonstration project. Use at your own risk.
