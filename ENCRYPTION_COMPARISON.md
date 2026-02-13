@@ -381,7 +381,6 @@ If you decide to implement zero-knowledge later:
 3. **Phase 3:** Migrate existing files (requires user passwords)
 4. **Phase 4:** Make zero-knowledge default
 
-**Estimated total time:** 10-15 hours for full migration
 
 ---
 

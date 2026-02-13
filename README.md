@@ -261,7 +261,6 @@ User enters password → Browser derives encryption key → Encrypt file in brow
 - ❌ Forget password = lose all files forever (no recovery)
 - ❌ Slower (JavaScript crypto vs native Python)
 
-### Implementation Difficulty: **Medium** ⚠️
 
 **Changes Required:**
 
@@ -275,7 +274,6 @@ User enters password → Browser derives encryption key → Encrypt file in brow
 | **File Sharing** | Server generates keys | Share encrypted key with link | Hard |
 | **Password Reset** | Possible | **IMPOSSIBLE** (by design) | N/A |
 
-**Estimated Implementation Time:** 6-8 hours
 
 **Files to Modify:**
 1. `frontend/package.json` - Add `pqc-kyber` or `@noble/post-quantum`
