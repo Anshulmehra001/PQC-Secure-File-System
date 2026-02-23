@@ -39,45 +39,50 @@ export default function Login({ onLogin }) {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <h2>{isLogin ? '🔐 Login' : '✨ Create Account'}</h2>
-        <p className="login-subtitle">
-          {isLogin ? 'Access your encrypted cloud storage' : 'Start using quantum-safe storage'}
-        </p>
+    <div className="login-page">
+      <div className="glow-box">
+        <div className="login-form-container">
+          <div className="login-form-box">
+            <h2 className="login-title">
+              <span className="login-icon">⚡</span>
+              {isLogin ? 'Login' : 'Sign Up'}
+              <span className="login-icon-heart">🔐</span>
+            </h2>
+            
+            <form onSubmit={handleSubmit}>
+              <input
+                type="text"
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                className="glow-input"
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength="6"
+                className="glow-input"
+              />
 
-        <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-            className="user-input"
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength="6"
-            className="user-input"
-          />
+              {error && <div className="error-message">{error}</div>}
 
-          {error && <div className="error-message">{error}</div>}
+              <button type="submit" disabled={loading} className="glow-submit">
+                {loading ? 'Please wait...' : (isLogin ? 'Sign In' : 'Create Account')}
+              </button>
+            </form>
 
-          <button type="submit" disabled={loading} className="upload-btn">
-            {loading ? '⏳ Please wait...' : (isLogin ? '🚀 Login' : '✨ Sign Up')}
-          </button>
-        </form>
-
-        <p className="login-toggle">
-          {isLogin ? "Don't have an account? " : 'Already have an account? '}
-          <span onClick={() => setIsLogin(!isLogin)}>
-            {isLogin ? 'Sign Up' : 'Login'}
-          </span>
-        </p>
+            <div className="login-links">
+              <a href="#" onClick={(e) => e.preventDefault()}>Forgot Password?</a>
+              <a href="#" onClick={(e) => { e.preventDefault(); setIsLogin(!isLogin); }} className="signup-link">
+                {isLogin ? 'Sign Up' : 'Login'}
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

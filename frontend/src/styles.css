@@ -931,3 +931,245 @@ body::after {
   .nav-links { flex-direction: column; gap: 1rem; }
   .user-info { flex-direction: column; gap: 0.5rem; }
 }
+
+
+/* Glowing Animated Login Form */
+.login-page {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+@property --angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.glow-box {
+  position: relative;
+  width: 400px;
+  height: 200px;
+  background: repeating-conic-gradient(
+    from var(--angle),
+    var(--cyber-accent) 0%,
+    var(--cyber-accent) 5%,
+    transparent 5%,
+    transparent 40%,
+    var(--cyber-accent) 50%
+  );
+  filter: drop-shadow(0 15px 50px rgba(0, 0, 0, 0.8));
+  animation: rotating 4s linear infinite;
+  border-radius: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: 0.5s;
+}
+
+.glow-box:hover {
+  width: 450px;
+  height: 550px;
+}
+
+@keyframes rotating {
+  0% {
+    --angle: 0deg;
+  }
+  100% {
+    --angle: 360deg;
+  }
+}
+
+.glow-box::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: repeating-conic-gradient(
+    from var(--angle),
+    var(--cyber-blue) 0%,
+    var(--cyber-blue) 5%,
+    transparent 5%,
+    transparent 40%,
+    var(--cyber-blue) 50%
+  );
+  filter: drop-shadow(0 15px 50px rgba(0, 0, 0, 0.8));
+  border-radius: 20px;
+  animation: rotating 4s linear infinite;
+  animation-delay: -1s;
+}
+
+.glow-box::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  background: var(--cyber-card);
+  border-radius: 15px;
+  border: 8px solid var(--cyber-bg);
+}
+
+.login-form-container {
+  position: absolute;
+  inset: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  flex-direction: column;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  box-shadow: inset 0 10px 20px rgba(0, 0, 0, 0.5);
+  border-bottom: 2px solid rgba(0, 255, 136, 0.5);
+  transition: 0.5s;
+  color: var(--cyber-text);
+  overflow: hidden;
+}
+
+.glow-box:hover .login-form-container {
+  inset: 40px;
+}
+
+.login-form-box {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  transform: translateY(126px);
+  gap: 20px;
+  width: 80%;
+  transition: 0.5s;
+}
+
+.glow-box:hover .login-form-box {
+  transform: translateY(0px);
+}
+
+.login-title {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-weight: 600;
+  font-size: 1.8rem;
+  color: var(--cyber-text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.login-icon {
+  color: var(--cyber-accent);
+  text-shadow: 0 0 5px var(--cyber-accent), 0 0 30px var(--cyber-accent);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.login-icon-heart {
+  color: var(--cyber-blue);
+  text-shadow: 0 0 5px var(--cyber-blue), 0 0 30px var(--cyber-blue);
+  animation: pulse 2s ease-in-out infinite;
+  animation-delay: 0.5s;
+}
+
+.login-form-box form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.glow-input {
+  width: 100%;
+  padding: 12px 20px;
+  outline: none;
+  font-size: 1em;
+  color: var(--cyber-text);
+  background: rgba(0, 0, 0, 0.2);
+  border: 2px solid var(--cyber-accent);
+  border-radius: 30px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.glow-input::placeholder {
+  color: var(--cyber-text-dim);
+}
+
+.glow-input:focus {
+  box-shadow: 0 0 10px var(--cyber-glow), 0 0 30px var(--cyber-glow);
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.glow-submit {
+  width: 100%;
+  padding: 12px 20px;
+  background: var(--cyber-blue);
+  border: none;
+  font-weight: 600;
+  color: var(--cyber-bg);
+  cursor: pointer;
+  transition: 0.5s;
+  border-radius: 30px;
+  font-size: 1em;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.glow-submit:hover {
+  box-shadow: 0 0 10px var(--cyber-blue), 0 0 60px var(--cyber-blue);
+  transform: translateY(-2px);
+}
+
+.glow-submit:disabled {
+  background: var(--cyber-border);
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.login-links {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.login-links a {
+  color: var(--cyber-text);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.login-links a:hover {
+  color: var(--cyber-accent);
+  text-shadow: 0 0 10px var(--cyber-glow);
+}
+
+.login-links .signup-link {
+  color: var(--cyber-accent);
+  font-weight: 600;
+}
+
+.login-links .signup-link:hover {
+  text-shadow: 0 0 15px var(--cyber-glow);
+}
+
+@media (max-width: 768px) {
+  .glow-box {
+    width: 350px;
+    height: 180px;
+  }
+  
+  .glow-box:hover {
+    width: 380px;
+    height: 520px;
+  }
+  
+  .login-form-box {
+    width: 90%;
+  }
+}
