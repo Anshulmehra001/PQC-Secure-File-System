@@ -65,7 +65,17 @@ export default function FileSharing() {
 
   return (
     <div className="container">
-      {loading && <Loader message="🔐 Encrypting with Kyber512..." />}
+      {loading && (
+        <Loader 
+          steps={[
+            '🔑 Generating Kyber512 keypair...',
+            '🔐 Encrypting with AES-256-GCM...',
+            '✍️ Signing with ML-DSA-44...',
+            '💾 Storing encrypted file...',
+            '✅ Generating share link...'
+          ]} 
+        />
+      )}
       
       <div className="hero">
         <h1>🔐 PQC-Based Secure File Sharing</h1>
@@ -107,19 +117,6 @@ export default function FileSharing() {
             {loading ? '🔐 Encrypting with PQC...' : '🚀 Upload & Generate Quantum-Safe Link'}
           </button>
         </div>
-
-        {loading && encryptionSteps.length > 0 && (
-          <div className="encryption-progress">
-            <h3>🔬 Encryption Process (Watch PQC in Action!)</h3>
-            <div className="steps-list">
-              {encryptionSteps.map((step, index) => (
-                <div key={index} className="step-item animate-in">
-                  {step}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {shareLink && (
           <div className="share-result">

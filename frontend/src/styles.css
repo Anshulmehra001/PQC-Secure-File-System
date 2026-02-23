@@ -1462,3 +1462,28 @@ body::after {
   0%, 65% { opacity: 0; }
   66%, 100% { opacity: 1; }
 }
+
+
+/* Loader Steps Indicator */
+.loader-steps-indicator {
+  display: flex;
+  gap: 12px;
+  margin-top: 2rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.step-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--cyber-border);
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
+}
+
+.step-dot.active {
+  background: var(--cyber-accent);
+  box-shadow: 0 0 20px var(--cyber-glow), 0 0 40px var(--cyber-glow);
+  transform: scale(1.5);
+}
