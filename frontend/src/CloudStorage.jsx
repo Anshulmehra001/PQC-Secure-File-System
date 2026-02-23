@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { API_URL } from './config';
+import Loader from './Loader';
 
 export default function CloudStorage({ token, username }) {
   const [files, setFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     fetchFiles();
@@ -47,6 +49,7 @@ export default function CloudStorage({ token, username }) {
 
   const handleDownload = async (fileId, filename) => {
     try {
+      setDownloading(true);
       const response = await fetch(`${API_URL}/api/storage/files/${fileId}/download`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -59,6 +62,8 @@ export default function CloudStorage({ token, username }) {
       a.click();
     } catch (error) {
       alert('Download failed: ' + error.message);
+    } finally {
+      setDownloading(false);
     }
   };
 
@@ -79,6 +84,9 @@ export default function CloudStorage({ token, username }) {
 
   return (
     <div className="container">
+      {uploading && <Loader message="🔐 Encrypting and uploading..." />}
+      {downloading && <Loader message="🔓 Decrypting your file..." />}
+      
       <div className="hero">
         <h1>☁️ PQC Secure Cloud Storage</h1>
         <p className="subtitle">Welcome back, {username}! Your quantum-safe storage</p>

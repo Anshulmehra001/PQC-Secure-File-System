@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { API_URL } from './config';
+import Loader from './Loader';
 
 export default function FileSharing() {
   const [file, setFile] = useState(null);
@@ -64,6 +65,8 @@ export default function FileSharing() {
 
   return (
     <div className="container">
+      {loading && <Loader message="🔐 Encrypting with Kyber512..." />}
+      
       <div className="hero">
         <h1>🔐 PQC-Based Secure File Sharing</h1>
         <p className="subtitle">Share files that even quantum computers can't hack</p>
