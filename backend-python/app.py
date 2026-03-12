@@ -461,18 +461,33 @@ def view_shared_file(share_id):
         conn.close()
         
         if not result:
-            return jsonify({'error': 'File not found'}), 404
+            return '''
+                <html><body style="background:#0a0e27;color:#00ff88;font-family:sans-serif;text-align:center;padding:50px;">
+                <h1>❌ File Not Found</h1>
+                <p>This file doesn't exist or has been deleted.</p>
+                </body></html>
+            ''', 404
         
         _, filename, filepath, kem_ct, shared_secret, signature, sig_pk, share_mode, expires_at, _ = result
         
         if time.time() * 1000 > expires_at:
-            return jsonify({'error': 'Link expired'}), 410
+            return '''
+                <html><body style="background:#0a0e27;color:#ff006e;font-family:sans-serif;text-align:center;padding:50px;">
+                <h1>⏰ Link Expired</h1>
+                <p>This share link has expired and is no longer available.</p>
+                </body></html>
+            ''', 410
         
         with open(filepath, 'r') as f:
             encrypted_data = f.read()
         
         if not PQCCrypto.verify_signature(bytes.fromhex(encrypted_data), signature, sig_pk):
-            return jsonify({'error': 'Signature verification failed'}), 400
+            return '''
+                <html><body style="background:#0a0e27;color:#ff006e;font-family:sans-serif;text-align:center;padding:50px;">
+                <h1>❌ Verification Failed</h1>
+                <p>File signature verification failed. File may be corrupted.</p>
+                </body></html>
+            ''', 400
         
         decrypted_data = PQCCrypto.decrypt_file_simple(encrypted_data, shared_secret)
         
@@ -497,7 +512,12 @@ def view_shared_file(share_id):
         return response
         
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return f'''
+            <html><body style="background:#0a0e27;color:#ff006e;font-family:sans-serif;text-align:center;padding:50px;">
+            <h1>❌ Error</h1>
+            <p>{str(e)}</p>
+            </body></html>
+        ''', 500
 
 # Cloud Storage Routes
 @app.route('/api/storage/upload', methods=['POST'])
