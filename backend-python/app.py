@@ -410,6 +410,7 @@ def get_share_info(share_id):
 def download_shared_file(share_id):
     try:
         conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row  # Enable column access by name
         c = conn.cursor()
         c.execute('SELECT * FROM shared_files WHERE id = ?', (share_id,))
         result = c.fetchone()
@@ -418,7 +419,13 @@ def download_shared_file(share_id):
         if not result:
             return jsonify({'error': 'File not found'}), 404
         
-        _, filename, filepath, kem_ct, shared_secret, signature, sig_pk, share_mode, expires_at, _ = result
+        filename = result['filename']
+        filepath = result['filepath']
+        shared_secret = result['encrypted_key']
+        signature = result['signature']
+        sig_pk = result['sig_public_key']
+        share_mode = result['share_mode'] if 'share_mode' in result.keys() else 'download'
+        expires_at = result['expires_at']
         
         # Block download if share_mode is view_only
         if share_mode == 'view_only':
@@ -455,6 +462,7 @@ def download_shared_file(share_id):
 def view_shared_file(share_id):
     try:
         conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row  # Enable column access by name
         c = conn.cursor()
         c.execute('SELECT * FROM shared_files WHERE id = ?', (share_id,))
         result = c.fetchone()
@@ -468,7 +476,12 @@ def view_shared_file(share_id):
                 </body></html>
             ''', 404
         
-        _, filename, filepath, kem_ct, shared_secret, signature, sig_pk, share_mode, expires_at, _ = result
+        filename = result['filename']
+        filepath = result['filepath']
+        shared_secret = result['encrypted_key']
+        signature = result['signature']
+        sig_pk = result['sig_public_key']
+        expires_at = result['expires_at']
         
         if time.time() * 1000 > expires_at:
             return '''
