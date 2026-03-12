@@ -42,6 +42,7 @@ def init_db():
             encrypted_key TEXT NOT NULL,
             signature TEXT NOT NULL,
             sig_public_key TEXT NOT NULL,
+            share_mode TEXT DEFAULT 'download',
             expires_at INTEGER NOT NULL,
             created_at INTEGER NOT NULL
         )
@@ -321,6 +322,7 @@ def share_upload():
         
         file = request.files['file']
         expiry_hours = int(request.form.get('expiryHours', 24))
+        share_mode = request.form.get('shareMode', 'download')  # 'download' or 'view_only'
         file_data = file.read()
         
         encryption_result = PQCCrypto.encrypt_file_simple(file_data)
@@ -338,8 +340,8 @@ def share_upload():
         c = conn.cursor()
         c.execute('''
             INSERT INTO shared_files 
-            (id, filename, filepath, kem_ciphertext, encrypted_key, signature, sig_public_key, expires_at, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (id, filename, filepath, kem_ciphertext, encrypted_key, signature, sig_public_key, share_mode, expires_at, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             share_id,
             file.filename,
@@ -348,6 +350,7 @@ def share_upload():
             encryption_result['shared_secret'],
             signature_result['signature'],
             signature_result['public_key'],
+            share_mode,
             expires_at,
             int(time.time() * 1000)
         ))
@@ -357,6 +360,7 @@ def share_upload():
         return jsonify({
             'shareId': share_id,
             'shareLink': f'http://localhost:5173/share/{share_id}',
+            'shareMode': share_mode,
             'expiresAt': expires_at,
             'algorithm': f'Kyber512 + AES-256-GCM + ML-DSA-44'
         })
@@ -369,21 +373,22 @@ def get_share_info(share_id):
     try:
         conn = sqlite3.connect(DB_PATH)
         c = conn.cursor()
-        c.execute('SELECT filename, expires_at FROM shared_files WHERE id = ?', (share_id,))
+        c.execute('SELECT filename, expires_at, share_mode FROM shared_files WHERE id = ?', (share_id,))
         result = c.fetchone()
         conn.close()
         
         if not result:
             return jsonify({'error': 'File not found'}), 404
         
-        filename, expires_at = result
+        filename, expires_at, share_mode = result
         
         if time.time() * 1000 > expires_at:
             return jsonify({'error': 'Link expired'}), 410
         
         return jsonify({
             'filename': filename,
-            'expiresAt': expires_at
+            'expiresAt': expires_at,
+            'shareMode': share_mode or 'download'
         })
         
     except Exception as e:
@@ -401,7 +406,11 @@ def download_shared_file(share_id):
         if not result:
             return jsonify({'error': 'File not found'}), 404
         
-        _, filename, filepath, kem_ct, shared_secret, signature, sig_pk, expires_at, _ = result
+        _, filename, filepath, kem_ct, shared_secret, signature, sig_pk, share_mode, expires_at, _ = result
+        
+        # Block download if share_mode is view_only
+        if share_mode == 'view_only':
+            return jsonify({'error': 'This file is view-only. Download not allowed.'}), 403
         
         if time.time() * 1000 > expires_at:
             return jsonify({'error': 'Link expired'}), 410
@@ -419,6 +428,54 @@ def download_shared_file(share_id):
             f.write(decrypted_data)
         
         response = send_file(temp_path, as_attachment=True, download_name=filename)
+        
+        @response.call_on_close
+        def cleanup():
+            if temp_path.exists():
+                temp_path.unlink()
+        
+        return response
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/share/<share_id>/view', methods=['GET'])
+def view_shared_file(share_id):
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute('SELECT * FROM shared_files WHERE id = ?', (share_id,))
+        result = c.fetchone()
+        conn.close()
+        
+        if not result:
+            return jsonify({'error': 'File not found'}), 404
+        
+        _, filename, filepath, kem_ct, shared_secret, signature, sig_pk, share_mode, expires_at, _ = result
+        
+        if time.time() * 1000 > expires_at:
+            return jsonify({'error': 'Link expired'}), 410
+        
+        with open(filepath, 'r') as f:
+            encrypted_data = f.read()
+        
+        if not PQCCrypto.verify_signature(bytes.fromhex(encrypted_data), signature, sig_pk):
+            return jsonify({'error': 'Signature verification failed'}), 400
+        
+        decrypted_data = PQCCrypto.decrypt_file_simple(encrypted_data, shared_secret)
+        
+        # Detect MIME type
+        import mimetypes
+        mime_type, _ = mimetypes.guess_type(filename)
+        if not mime_type:
+            mime_type = 'application/octet-stream'
+        
+        # Return file for inline viewing
+        temp_path = UPLOAD_DIR / f"temp_{share_id}"
+        with open(temp_path, 'wb') as f:
+            f.write(decrypted_data)
+        
+        response = send_file(temp_path, mimetype=mime_type, as_attachment=False, download_name=filename)
         
         @response.call_on_close
         def cleanup():

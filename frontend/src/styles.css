@@ -1487,3 +1487,35 @@ body::after {
   box-shadow: 0 0 20px var(--cyber-glow), 0 0 40px var(--cyber-glow);
   transform: scale(1.5);
 }
+
+
+/* View Only Notice */
+.view-only-notice {
+  color: var(--cyber-yellow) !important;
+  font-weight: 700 !important;
+  background: rgba(255, 190, 11, 0.1);
+  padding: 10px 15px;
+  border-radius: 8px;
+  border: 2px solid var(--cyber-yellow);
+  margin-top: 10px;
+}
+
+.share-mode-select {
+  flex: 1;
+  padding: 12px 20px;
+  background: var(--cyber-bg);
+  border: 2px solid var(--cyber-border);
+  border-radius: 10px;
+  color: var(--cyber-text);
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: 'Space Grotesk', sans-serif;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.share-mode-select:focus {
+  outline: none;
+  border-color: var(--cyber-accent);
+  box-shadow: 0 0 20px var(--cyber-glow);
+}

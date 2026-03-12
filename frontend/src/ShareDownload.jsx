@@ -29,6 +29,11 @@ export default function ShareDownload() {
   const handleDownload = async () => {
     try {
       const response = await fetch(`${API_URL}/api/share/${id}/download`);
+      if (!response.ok) {
+        const data = await response.json();
+        alert(data.error || 'Download failed');
+        return;
+      }
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -38,6 +43,11 @@ export default function ShareDownload() {
     } catch (error) {
       alert('Download failed: ' + error.message);
     }
+  };
+
+  const handleView = () => {
+    // Open view in new tab
+    window.open(`${API_URL}/api/share/${id}/view`, '_blank');
   };
 
   if (error) {
@@ -64,7 +74,7 @@ export default function ShareDownload() {
   return (
     <div className="container">
       <div className="card">
-        <h2>📥 Download Shared File</h2>
+        <h2>{fileInfo.shareMode === 'view_only' ? '👁️ View Shared File' : '📥 Download Shared File'}</h2>
         <div className="download-info">
           <div className="file-preview">
             <span className="file-icon-large">📄</span>
@@ -75,10 +85,19 @@ export default function ShareDownload() {
             <p>✓ Signed with CRYSTALS-Dilithium2</p>
             <p>✓ Protected by AES-256-GCM</p>
             <p>⏰ Link expires: {new Date(fileInfo.expiresAt).toLocaleString()}</p>
+            {fileInfo.shareMode === 'view_only' && (
+              <p className="view-only-notice">🔒 This file is view-only. Download is disabled.</p>
+            )}
           </div>
-          <button onClick={handleDownload} className="btn-primary btn-large">
-            Download File
-          </button>
+          {fileInfo.shareMode === 'view_only' ? (
+            <button onClick={handleView} className="btn-primary btn-large">
+              👁️ View File
+            </button>
+          ) : (
+            <button onClick={handleDownload} className="btn-primary btn-large">
+              📥 Download File
+            </button>
+          )}
         </div>
       </div>
     </div>

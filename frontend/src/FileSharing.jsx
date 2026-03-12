@@ -5,6 +5,7 @@ import Loader from './Loader';
 export default function FileSharing() {
   const [file, setFile] = useState(null);
   const [expiryHours, setExpiryHours] = useState(24);
+  const [shareMode, setShareMode] = useState('download'); // 'download' or 'view_only'
   const [shareLink, setShareLink] = useState('');
   const [loading, setLoading] = useState(false);
   const [encryptionSteps, setEncryptionSteps] = useState([]);
@@ -34,6 +35,7 @@ export default function FileSharing() {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('expiryHours', expiryHours);
+    formData.append('shareMode', shareMode);
 
     try {
       console.log('Uploading file to backend...');
@@ -100,6 +102,14 @@ export default function FileSharing() {
             <label htmlFor="file-upload" className="file-input-label">
               {file ? `📄 ${file.name}` : '📁 Choose a file to encrypt'}
             </label>
+          </div>
+          
+          <div className="expiry-section">
+            <label>🔒 Share Type:</label>
+            <select value={shareMode} onChange={(e) => setShareMode(e.target.value)} className="share-mode-select">
+              <option value="download">📥 Allow Download</option>
+              <option value="view_only">👁️ View Only (No Download)</option>
+            </select>
           </div>
           
           <div className="expiry-section">
