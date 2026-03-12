@@ -69,6 +69,18 @@ def init_db():
             FOREIGN KEY (user_id) REFERENCES users(id)
         )
     ''')
+    
+    # Auto-migration: Add share_mode column if it doesn't exist
+    try:
+        c.execute("PRAGMA table_info(shared_files)")
+        columns = [row[1] for row in c.fetchall()]
+        if 'share_mode' not in columns:
+            print("🔄 Migrating database: Adding share_mode column...")
+            c.execute("ALTER TABLE shared_files ADD COLUMN share_mode TEXT DEFAULT 'download'")
+            print("✅ Migration complete!")
+    except Exception as e:
+        print(f"⚠️  Migration warning: {e}")
+    
     conn.commit()
     conn.close()
 
