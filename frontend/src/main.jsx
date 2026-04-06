@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-do
 import FileSharing from './FileSharing';
 import CloudStorage from './CloudStorage';
 import ShareDownload from './ShareDownload';
+import FileViewer from './FileViewer';
 import Login from './Login';
 import { API_URL } from './config';
 import './styles.css';
@@ -69,6 +70,7 @@ function App() {
             <Login onLogin={handleLogin} />
         } />
         <Route path="/share/:id" element={<ShareDownload />} />
+        <Route path="/view/:id" element={<FileViewer />} />
       </Routes>
     </div>
   );

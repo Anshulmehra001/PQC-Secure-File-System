@@ -462,7 +462,7 @@ def download_shared_file(share_id):
 def view_shared_file(share_id):
     try:
         conn = sqlite3.connect(DB_PATH)
-        conn.row_factory = sqlite3.Row  # Enable column access by name
+        conn.row_factory = sqlite3.Row
         c = conn.cursor()
         c.execute('SELECT * FROM shared_files WHERE id = ?', (share_id,))
         result = c.fetchone()
@@ -510,17 +510,11 @@ def view_shared_file(share_id):
         if not mime_type:
             mime_type = 'application/octet-stream'
         
-        # Return file for inline viewing
-        temp_path = UPLOAD_DIR / f"temp_{share_id}"
-        with open(temp_path, 'wb') as f:
-            f.write(decrypted_data)
-        
-        response = send_file(temp_path, mimetype=mime_type, as_attachment=False, download_name=filename)
-        
-        @response.call_on_close
-        def cleanup():
-            if temp_path.exists():
-                temp_path.unlink()
+        # Return file data directly with inline disposition
+        from flask import Response
+        response = Response(decrypted_data, mimetype=mime_type)
+        response.headers['Content-Disposition'] = f'inline; filename="{filename}"'
+        response.headers['X-Content-Type-Options'] = 'nosniff'
         
         return response
         
@@ -531,6 +525,110 @@ def view_shared_file(share_id):
             <p>{str(e)}</p>
             </body></html>
         ''', 500
+
+@app.route('/api/share/<share_id>/pdf-info', methods=['GET'])
+def get_pdf_info(share_id):
+    try:
+        import fitz
+        
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        c = conn.cursor()
+        c.execute('SELECT * FROM shared_files WHERE id = ?', (share_id,))
+        result = c.fetchone()
+        conn.close()
+        
+        if not result:
+            return jsonify({'error': 'File not found'}), 404
+        
+        if time.time() * 1000 > result['expires_at']:
+            return jsonify({'error': 'Link expired'}), 410
+        
+        filename = result['filename']
+        if not filename.lower().endswith('.pdf'):
+            return jsonify({'error': 'Not a PDF file'}), 400
+        
+        filepath = result['filepath']
+        shared_secret = result['encrypted_key']
+        signature = result['signature']
+        sig_pk = result['sig_public_key']
+        
+        with open(filepath, 'r') as f:
+            encrypted_data = f.read()
+        
+        if not PQCCrypto.verify_signature(bytes.fromhex(encrypted_data), signature, sig_pk):
+            return jsonify({'error': 'Signature verification failed'}), 400
+        
+        decrypted_data = PQCCrypto.decrypt_file_simple(encrypted_data, shared_secret)
+        
+        pdf_document = fitz.open(stream=decrypted_data, filetype="pdf")
+        page_count = pdf_document.page_count
+        pdf_document.close()
+        
+        return jsonify({
+            'pageCount': page_count,
+            'filename': filename
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/share/<share_id>/pdf-page/<int:page_num>', methods=['GET'])
+def get_pdf_page(share_id, page_num):
+    try:
+        import fitz
+        from io import BytesIO
+        
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        c = conn.cursor()
+        c.execute('SELECT * FROM shared_files WHERE id = ?', (share_id,))
+        result = c.fetchone()
+        conn.close()
+        
+        if not result:
+            return jsonify({'error': 'File not found'}), 404
+        
+        if time.time() * 1000 > result['expires_at']:
+            return jsonify({'error': 'Link expired'}), 410
+        
+        filepath = result['filepath']
+        shared_secret = result['encrypted_key']
+        signature = result['signature']
+        sig_pk = result['sig_public_key']
+        
+        with open(filepath, 'r') as f:
+            encrypted_data = f.read()
+        
+        if not PQCCrypto.verify_signature(bytes.fromhex(encrypted_data), signature, sig_pk):
+            return jsonify({'error': 'Signature verification failed'}), 400
+        
+        decrypted_data = PQCCrypto.decrypt_file_simple(encrypted_data, shared_secret)
+        
+        pdf_document = fitz.open(stream=decrypted_data, filetype="pdf")
+        
+        if page_num < 1 or page_num > pdf_document.page_count:
+            pdf_document.close()
+            return jsonify({'error': 'Invalid page number'}), 400
+        
+        page = pdf_document[page_num - 1]
+        
+        mat = fitz.Matrix(2.0, 2.0)
+        pix = page.get_pixmap(matrix=mat)
+        
+        img_data = pix.tobytes("png")
+        pdf_document.close()
+        
+        from flask import Response
+        response = Response(img_data, mimetype='image/png')
+        response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+        
+        return response
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 # Cloud Storage Routes
 @app.route('/api/storage/upload', methods=['POST'])

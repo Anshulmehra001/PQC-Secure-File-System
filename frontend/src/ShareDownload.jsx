@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { API_URL } from './config';
 
 export default function ShareDownload() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [fileInfo, setFileInfo] = useState(null);
   const [error, setError] = useState('');
 
@@ -46,8 +47,7 @@ export default function ShareDownload() {
   };
 
   const handleView = () => {
-    // Open view in new tab
-    window.open(`${API_URL}/api/share/${id}/view`, '_blank');
+    navigate(`/view/${id}`);
   };
 
   if (error) {

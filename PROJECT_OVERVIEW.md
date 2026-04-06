@@ -16,11 +16,15 @@ PQC App/
 │
 ├── backend-python/
 │   ├── app.py           # Flask server + PQC crypto
+│   ├── admin.py         # Admin CLI tool
+│   ├── auto_cleanup.py  # Automatic cleanup service
+│   ├── ADMIN_GUIDE.md   # Admin tool documentation
 │   ├── requirements.txt # Python dependencies
 │   ├── pqc_files.db    # SQLite database
 │   ├── venv/           # Python virtual environment
 │   ├── uploads/        # Shared files (encrypted)
-│   └── storage/        # Cloud files (encrypted)
+│   ├── storage/        # Cloud files (encrypted)
+│   └── trash/          # Deleted files (30-day retention)
 │
 └── frontend/
     ├── src/
@@ -29,6 +33,9 @@ PQC App/
     │   ├── FileSharing.jsx    # File sharing UI
     │   ├── CloudStorage.jsx   # Cloud storage UI
     │   ├── ShareDownload.jsx  # Download page
+    │   ├── FileViewer.jsx     # View-only file viewer
+    │   ├── Loader.jsx         # 3D animated loader
+    │   ├── config.js          # API configuration
     │   └── styles.css         # Cyberpunk theme
     ├── index.html
     ├── package.json
@@ -55,9 +62,18 @@ PQC App/
 - Backend implementation
 - Frontend implementation
 - Database schema
-- API reference
+- API reference (including view-only endpoints)
 - Security analysis
 - Performance benchmarks
+
+### For Admin and Maintenance
+**Read:** [ADMIN_GUIDE.md](backend-python/ADMIN_GUIDE.md)
+- Admin CLI tool usage
+- Automatic cleanup service
+- Trash bin system
+- File management
+- Database maintenance
+- Monitoring and troubleshooting
 
 ### For Verifying Quantum Encryption
 **Read:** [PROVE_PQC.md](PROVE_PQC.md)
@@ -75,6 +91,7 @@ PQC App/
 - Project overview
 - Quick start guide
 - How to use the app
+- New features (view-only, admin tools)
 - Technology summary
 - Links to other docs
 
@@ -120,6 +137,8 @@ npm --version
 ### File Sharing
 - Upload files with quantum-safe encryption
 - Generate expiring share links (1-24 hours)
+- **View-only mode**: Share files for viewing without download
+- **Enhanced PDF protection**: PDFs rendered as images
 - Digital signatures for integrity
 - No login required
 
@@ -128,6 +147,13 @@ npm --version
 - Personal encrypted storage
 - Upload/download/delete files
 - Complete user isolation
+
+### Admin Tools
+- **admin.py**: Interactive CLI for file management
+- **auto_cleanup.py**: Automatic cleanup service
+- Statistics and monitoring
+- Trash bin system (30-day retention)
+- Orphaned file detection and cleanup
 
 ### Cryptography
 - **Kyber512**: Post-quantum key exchange

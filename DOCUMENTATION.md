@@ -190,10 +190,25 @@ This diagram shows how your Python code connects to the C library:
 - Provides AES-GCM implementation
 - Why: Fast symmetric encryption
 
+**PyMuPDF 1.27.2**
+- PDF processing library (also known as fitz)
+- Converts PDF pages to images
+- Why: Secure PDF viewing (prevents download)
+
+**Pillow 12.1.1**
+- Python Imaging Library
+- Image processing for watermarks
+- Why: Add watermarks to viewed files
+
 **Flask-CORS 4.0.0**
 - Cross-Origin Resource Sharing
 - Allows frontend (port 5173) to call backend (port 3001)
 - Why: Required for local development
+
+**schedule 1.2.0**
+- Job scheduling library
+- Runs cleanup tasks automatically
+- Why: Auto-cleanup expired files
 
 **SQLite 3**
 - Embedded SQL database
@@ -502,11 +517,15 @@ SHA-256 reduced to 128-bit security (still secure).
 ```
 backend-python/
 ├── app.py              # Main Flask application
+├── admin.py            # Admin CLI tool for file management
+├── auto_cleanup.py     # Automated cleanup scheduler
+├── ADMIN_GUIDE.md      # Admin tool documentation
 ├── requirements.txt    # Python dependencies
 ├── pqc_files.db       # SQLite database
 ├── venv/              # Python virtual environment
 ├── uploads/           # Temporary shared files (encrypted)
-└── storage/           # Cloud storage files (encrypted)
+├── storage/           # Cloud storage files (encrypted)
+└── trash/             # Deleted files (30-day retention)
 ```
 
 ### app.py - Main Components
@@ -552,9 +571,12 @@ class Auth:
 - `GET /api/auth/verify`: Verify token
 
 **File sharing routes:**
-- `POST /api/share/upload`: Upload and encrypt file
+- `POST /api/share/upload`: Upload and encrypt file (with share mode)
 - `GET /api/share/:id`: Get share info
-- `GET /api/share/:id/download`: Download file
+- `GET /api/share/:id/download`: Download file (blocked if view-only)
+- `GET /api/share/:id/view`: View file in browser
+- `GET /api/share/:id/pdf-info`: Get PDF page count (for view-only PDFs)
+- `GET /api/share/:id/pdf-page/:page_num`: Get PDF page as PNG image
 
 **Cloud storage routes (protected):**
 - `POST /api/storage/upload`: Upload file
@@ -1014,6 +1036,7 @@ CREATE TABLE shared_files (
     encrypted_key TEXT NOT NULL,   -- Shared secret (hex)
     signature TEXT NOT NULL,       -- ML-DSA signature (hex)
     sig_public_key TEXT NOT NULL,  -- Signature public key (hex)
+    share_mode TEXT DEFAULT 'download',  -- 'download' or 'view_only'
     expires_at INTEGER NOT NULL,   -- Expiration timestamp
     created_at INTEGER NOT NULL    -- Creation timestamp
 );
@@ -1205,6 +1228,7 @@ Content-Type: multipart/form-data
 
 file: [binary file data]
 expiryHours: 24
+shareMode: "download" or "view_only"
 ```
 
 **Response (200 OK):**
@@ -1212,6 +1236,7 @@ expiryHours: 24
 {
   "shareId": "abc-123-def",
   "shareLink": "http://localhost:5173/share/abc-123-def",
+  "shareMode": "view_only",
   "expiresAt": 1704153600000,
   "algorithm": "Kyber512 + AES-256-GCM + ML-DSA-44"
 }
@@ -1228,7 +1253,8 @@ Get information about shared file.
 ```json
 {
   "filename": "document.pdf",
-  "expiresAt": 1704153600000
+  "expiresAt": 1704153600000,
+  "shareMode": "view_only"
 }
 ```
 
@@ -1249,9 +1275,60 @@ Content-Disposition: attachment; filename="document.pdf"
 ```
 
 **Errors:**
+- 403: File is view-only, download not allowed
 - 404: File not found
 - 410: Link expired
 - 400: Signature verification failed
+
+#### GET /api/share/:id/view
+
+View file in browser (for view-only mode).
+
+**Response (200 OK):**
+```
+Content-Type: [detected MIME type]
+Content-Disposition: inline; filename="document.pdf"
+
+[decrypted file data]
+```
+
+**Errors:**
+- 404: File not found
+- 410: Link expired
+- 400: Signature verification failed
+
+#### GET /api/share/:id/pdf-info
+
+Get PDF information for view-only PDFs.
+
+**Response (200 OK):**
+```json
+{
+  "pageCount": 10,
+  "filename": "document.pdf"
+}
+```
+
+**Errors:**
+- 404: File not found
+- 410: Link expired
+- 400: Not a PDF file
+
+#### GET /api/share/:id/pdf-page/:page_num
+
+Get individual PDF page as PNG image (for view-only mode).
+
+**Response (200 OK):**
+```
+Content-Type: image/png
+
+[PNG image data of PDF page]
+```
+
+**Errors:**
+- 404: File not found
+- 410: Link expired
+- 400: Invalid page number
 
 ### Cloud Storage Endpoints
 
